@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>vxo-morse-core — browser demo</title>
+  <style>
+    :root {
+      font-family: system-ui, sans-serif;
+      color: #e8eef7;
+      background: #0f1419;
+    }
+    body { max-width: 40rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.45; }
+    h1 { font-size: 1.25rem; font-weight: 600; }
+    label { display: block; margin-top: 0.75rem; font-size: 0.85rem; opacity: 0.85; }
+    input, select, button, textarea {
+      font: inherit; margin-top: 0.25rem;
+      border-radius: 6px; border: 1px solid #334;
+      background: #1a222d; color: inherit; padding: 0.4rem 0.55rem;
+    }
+    button { cursor: pointer; background: #2a6df4; border-color: #2a6df4; }
+    button.secondary { background: #243044; border-color: #445; }
+    .row { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: end; margin-top: 1rem; }
+    .mono { font-family: ui-monospace, monospace; letter-spacing: 0.06em; }
+    .hint { font-size: 0.8rem; opacity: 0.7; margin-top: 1.5rem; }
+    #score { margin-top: 0.75rem; }
+  </style>
+</head>
+<body>
+  <h1>vxo-morse-core — minimal browser demo</h1>
+  <p>UNCLASSIFIED hobby/edu Morse. Commercial packs: <a href="https://8nm-edu-store.pages.dev">8nm-edu-store</a> (separate).</p>
+
+  <label>Charset
+    <select id="charset">
+      <option value="letters">letters</option>
+      <option value="numbers">numbers</option>
+      <option value="alphanum">alphanum</option>
+    </select>
+  </label>
+  <label>Char WPM <input id="charWpm" type="number" value="18" min="5" max="40" /></label>
+  <label>Effective WPM (Farnsworth) <input id="effWpm" type="number" value="12" min="5" max="40" /></label>
+  <label>Length <input id="length" type="number" value="15" min="1" max="100" /></label>
+
+  <div class="row">
+    <button type="button" id="gen">Generate drill</button>
+    <button type="button" id="play" class="secondary">Play</button>
+    <button type="button" id="stop" class="secondary">Stop</button>
+  </div>
+
+  <label>Drill
+    <textarea id="drill" class="mono" rows="3" readonly></textarea>
+  </label>
+  <label>Your copy
+    <textarea id="copy" class="mono" rows="3" placeholder="Type what you heard…"></textarea>
+  </label>
+  <div class="row">
+    <button type="button" id="check">Score</button>
+  </div>
+  <div id="score" class="mono"></div>
+
+  <p class="hint">Serve this file from the repo root (ES modules), e.g. <code>npx serve ..</code> from <code>examples/</code>, or open via a static server pointing at the package root so <code>../src/</code> resolves.</p>
+
+  <script type="module">
+    import {
+      generateDrill,
+      createTonePlayer,
+      scoreCopy,
+      encodeText,
+    } from '../src/index.js';
+
+    let player = null;
+    let currentText = '';
+
+    function opts() {
+      return {
+        charset: document.getElementById('charset').value,
+        length: Number(document.getElementById('length').value) || 15,
+        groupSize: 5,
+        seed: Date.now() % 1e9,
+      };
+    }
+
+    document.getElementById('gen').onclick = () => {
+      const d = generateDrill(opts());
+      currentText = d.text;
+      document.getElementById('drill').value = d.text + '\n' + encodeText(d.text);
+      document.getElementById('copy').value = '';
+      document.getElementById('score').textContent = '';
+    };
+
+    document.getElementById('play').onclick = async () => {
+      if (!currentText) document.getElementById('gen').click();
+      const charWpm = Number(document.getElementById('charWpm').value) || 18;
+      const effectiveWpm = Number(document.getElementById('effWpm').value) || charWpm;
+      if (player) player.stop();
+      player = createTonePlayer({ charWpm, effectiveWpm, frequency: 600, gain: 0.15 });
+      await player.play(currentText);
+    };
+
+    document.getElementById('stop').onclick = () => {
+      if (player) player.stop();
+    };
+
+    document.getElementById('check').onclick = () => {
+      const r = scoreCopy(currentText, document.getElementById('copy').value);
+      document.getElementById('score').textContent =
+        `accuracy ${(r.accuracy * 100).toFixed(1)}%  (${r.correct}/${r.total})`;
+    };
+
+    document.getElementById('gen').click();
+  </script>
+</body>
+</html>

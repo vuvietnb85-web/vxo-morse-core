@@ -1,0 +1,50 @@
+{
+  "name": "vxo-morse-core",
+  "version": "0.1.0",
+  "description": "UNCLASSIFIED hobby/edu Morse learning core: Koch/Farnsworth timing, drills, Web Audio helper (VxO Digital Labs / SPONSOR HUNT)",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./timing": "./src/timing.js",
+    "./alphabet": "./src/alphabet.js",
+    "./drill": "./src/drill.js",
+    "./audio": "./src/audio.js",
+    "./score": "./src/score.js"
+  },
+  "files": [
+    "src",
+    "docs",
+    "examples",
+    "LICENSE",
+    "README.md",
+    "SECURITY.md"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "demo:check": "node -e \"import('./src/index.js').then(m => console.log('ok', Object.keys(m).join(',')))\""
+  },
+  "keywords": [
+    "morse",
+    "cw",
+    "koch",
+    "farnsworth",
+    "ham-radio",
+    "education",
+    "web-audio",
+    "foss"
+  ],
+  "author": "Việt Vũ / VxO Digital Labs",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vxo-digital-labs/vxo-morse-core.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vxo-digital-labs/vxo-morse-core/issues"
+  },
+  "homepage": "https://github.com/vxo-digital-labs/vxo-morse-core#readme"
+}
